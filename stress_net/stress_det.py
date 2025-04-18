@@ -35,13 +35,14 @@ import numpy as np
 def preprocess_data_supervised(file_path):
     df = pd.read_csv(file_path)
 
-    condition_encoding = {'no stress': 0, 'time pressure': 1, 'interruption': 2}
+    # condition_encoding = {'no stress': 0, 'time pressure': 1, 'interruption': 2}
     new_binary_encoding = {'no stress': 0, 'stress': 1}
     #df['condition'] = df['condition'].map(condition_encoding)
     df['condition'] = df['condition'].replace({'interruption': 'stress', 'time pressure': 'stress'})
     df['condition'] = df['condition'].map(new_binary_encoding)
 
-    features = df.iloc[:, :-2]
+    selected = df[["MEAN_RR", "MEDIAN_RR", "SDRR", "SDRR_RMSSD", "HR", "MEAN_REL_RR", "MEDIAN_REL_RR", "SDRR_REL_RR"]]
+    features = selected.iloc[:]
     target = df.iloc[:, -1]
 
     scaler = StandardScaler()
@@ -84,8 +85,8 @@ def evaluate_classification(model, train_x, train_y, test_x, test_y):
     plt.ylabel("True Label")
     plt.show()
 
-trainx, trainy = preprocess_data_supervised('final/train.csv')
-testx, testy = preprocess_data_supervised('final/test.csv')
+trainx, trainy = preprocess_data_supervised('train.csv')
+testx, testy = preprocess_data_supervised('test.csv')
 
 random_forest = RandomForestClassifier(
     class_weight= 'balanced',
@@ -107,24 +108,24 @@ decision_tree = DecisionTreeClassifier(
 #                         trainx, trainy, testx, 
 #                         testy)
 
-# random_forest.fit(trainx, trainy)
+random_forest.fit(trainx, trainy)
 
-# evaluate_classification(random_forest, 
-#                         trainx, trainy, testx, 
-#                         testy)
+evaluate_classification(random_forest, 
+                        trainx, trainy, testx, 
+                        testy)
 
 
 
 #graphing a pie chart
-df = pd.read_csv('final/test.csv')
+# df = pd.read_csv('final/test.csv')
 
-# merge 2 classes into stress class
-df['condition'] = df['condition'].replace({'interruption': 'stress', 'time pressure': 'stress'})
+# # merge 2 classes into stress class
+# df['condition'] = df['condition'].replace({'interruption': 'stress', 'time pressure': 'stress'})
 
 
-condition_counts = df['condition'].value_counts()
-labels = condition_counts.index
-sizes = condition_counts.values
-plt.pie(sizes, labels=labels, autopct='%1.1f%%')
-plt.title('condition_counts')
-plt.show()
+# condition_counts = df['condition'].value_counts()
+# labels = condition_counts.index
+# sizes = condition_counts.values
+# plt.pie(sizes, labels=labels, autopct='%1.1f%%')
+# plt.title('condition_counts')
+# plt.show()
